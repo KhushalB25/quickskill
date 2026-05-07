@@ -1,8 +1,0 @@
-[
-  ["click", "@e20"],
-  ["wait", "1"],
-  ["snapshot", ""],
-  ["click", "@e24"],
-  ["wait", "1.5"],
-  ["snapshot", ""]
-]

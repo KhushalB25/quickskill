@@ -1,9 +1,20 @@
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import useProgressStore from '../stores/useProgressStore';
 import useSkillStore from '../stores/useSkillStore';
 import useStreakStore from '../stores/useStreakStore';
 import useAchievementStore from '../stores/useAchievementStore';
+import {
+  db,
+  doc,
+  getDoc,
+} from '../firebase';
+import {
+  validateUsernameFormat,
+  checkUsernameAvailability,
+  claimUsername,
+  canChangeUsername,
+} from '../utils/firestoreHelpers';
 
 export default function Profile({ user }) {
   const { progress, totalCorrect } = useProgressStore();
@@ -11,7 +22,25 @@ export default function Profile({ user }) {
   const { currentStreak, longestStreak } = useStreakStore();
   const { achievements } = useAchievementStore();
 
+  // Username state
+  const [userData, setUserData] = useState(null);
+  const [editingName, setEditingName] = useState(false);
+  const [newUsername, setNewUsername] = useState('');
+  const [nameError, setNameError] = useState('');
+  const [nameStatus, setNameStatus] = useState('');
+  const [savingName, setSavingName] = useState(false);
+  const [changeInfo, setChangeInfo] = useState(null);
+
   const skillIds = Object.keys(progress);
+
+  useEffect(() => {
+    if (!user?.uid) return;
+    getDoc(doc(db, 'users', user.uid)).then((snap) => {
+      if (snap.exists()) setUserData(snap.data());
+    }).catch(() => {});
+  }, [user?.uid]);
+
+  const currentUsername = userData?.username || user?.displayName || null;
 
   const unlockedAchievements = useMemo(
     () => achievements.filter((a) => a.unlocked),
@@ -22,6 +51,84 @@ export default function Profile({ user }) {
     () => achievements.filter((a) => !a.unlocked),
     [achievements]
   );
+
+  const handleEditClick = () => {
+    setEditingName(true);
+    setNewUsername(currentUsername || '');
+    setNameError('');
+    setNameStatus('');
+    const info = canChangeUsername(userData || {});
+    setChangeInfo(info);
+    if (!info.allowed) {
+      setNameError(info.message);
+    }
+  };
+
+  const handleUsernameChange = async (value) => {
+    setNewUsername(value);
+    setNameError('');
+    setNameStatus('');
+
+    const formatError = validateUsernameFormat(value);
+    if (formatError) {
+      setNameError(formatError);
+      return;
+    }
+
+    // Don't check availability for own current name
+    if (value.toLowerCase() === (currentUsername || '').toLowerCase()) {
+      setNameStatus('This is your current username.');
+      return;
+    }
+
+    const result = await checkUsernameAvailability(value);
+    if (!result.available) {
+      setNameError(result.message);
+    } else {
+      setNameStatus('Username available');
+    }
+  };
+
+  const handleSaveUsername = async () => {
+    if (!user?.uid) return;
+    setNameError('');
+
+    const formatError = validateUsernameFormat(newUsername);
+    if (formatError) {
+      setNameError(formatError);
+      return;
+    }
+
+    if (newUsername.toLowerCase() === (currentUsername || '').toLowerCase()) {
+      setEditingName(false);
+      return;
+    }
+
+    const avail = await checkUsernameAvailability(newUsername);
+    if (!avail.available) {
+      setNameError(avail.message);
+      return;
+    }
+
+    const info = canChangeUsername(userData || {});
+    if (!info.allowed) {
+      setNameError(info.message);
+      return;
+    }
+
+    setSavingName(true);
+    const result = await claimUsername(user.uid, newUsername.trim());
+    setSavingName(false);
+
+    if (result.success) {
+      // Refresh user data
+      const snap = await getDoc(doc(db, 'users', user.uid));
+      if (snap.exists()) setUserData(snap.data());
+      setEditingName(false);
+    } else {
+      setNameError(result.message);
+    }
+  };
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
@@ -52,15 +159,64 @@ export default function Profile({ user }) {
               <img src={user.photoURL} alt="" className="h-full w-full rounded-[21px] object-cover" />
             ) : (
               <span className="gradient-text font-display text-4xl">
-                {(user?.displayName || user?.email || '?').charAt(0).toUpperCase()}
+                {(currentUsername || user?.email || '?').charAt(0).toUpperCase()}
               </span>
             )}
           </div>
         </div>
 
-        <h1 className="font-display text-3xl font-bold gradient-text-gold">
-          {user?.displayName || 'User'}
-        </h1>
+        {editingName ? (
+          <div className="mt-2 space-y-2">
+            <div className="flex items-center gap-2 justify-center">
+              <input
+                type="text"
+                className="input-neural w-48 text-center"
+                value={newUsername}
+                onChange={(e) => handleUsernameChange(e.target.value)}
+                placeholder="new_username"
+                maxLength={20}
+                autoFocus
+              />
+              <button
+                onClick={handleSaveUsername}
+                disabled={!!nameError || savingName || newUsername === currentUsername}
+                className="btn-primary px-3 py-1.5 text-xs disabled:opacity-50"
+              >
+                {savingName ? 'Saving...' : 'Save'}
+              </button>
+              <button
+                onClick={() => setEditingName(false)}
+                className="btn-secondary px-3 py-1.5 text-xs"
+              >
+                Cancel
+              </button>
+            </div>
+            {nameError && <p className="text-xs text-neon-coral font-body">{nameError}</p>}
+            {nameStatus && <p className="text-xs text-emerald-400 font-body">{nameStatus}</p>}
+            {changeInfo && changeInfo.allowed && (
+              <p className="text-xs text-white/30 font-body">
+                {changeInfo.remaining} of {changeInfo.limit} changes remaining (resets every 60 days)
+              </p>
+            )}
+          </div>
+        ) : (
+          <div className="flex items-center gap-3 justify-center">
+            <h1 className="font-display text-3xl font-bold gradient-text-gold">
+              {currentUsername || 'Set your username'}
+            </h1>
+            {currentUsername && (
+              <button
+                onClick={handleEditClick}
+                className="text-xs text-white/30 hover:text-white/60 font-body transition-colors"
+                title="Change username"
+              >
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                </svg>
+              </button>
+            )}
+          </div>
+        )}
         <p className="mt-1 text-sm text-white/30 font-body">{user?.email}</p>
 
         <div className="hero-title-rule">

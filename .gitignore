@@ -7,3 +7,4 @@ serviceAccountKey.json
 .DS_Store
 *.log
 .gstack/
+.claude/settings.local.json
