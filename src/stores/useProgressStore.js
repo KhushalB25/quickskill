@@ -48,7 +48,7 @@ const useProgressStore = create(
               totalAttempted: 0,
               lastActive: serverTimestamp(),
               createdAt: serverTimestamp(),
-            });
+            }, { merge: true });
             set({ progress: {}, totalCorrect: 0, totalAttempted: 0, loading: false });
           }
         } catch (err) {

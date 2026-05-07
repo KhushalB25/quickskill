@@ -24,6 +24,7 @@ import {
   deleteDoc,
   serverTimestamp,
   arrayUnion,
+  runTransaction,
 } from 'firebase/firestore';
 import { getAnalytics, logEvent } from 'firebase/analytics';
 
@@ -67,5 +68,6 @@ export {
   deleteDoc,
   serverTimestamp,
   arrayUnion,
+  runTransaction,
   logEvent,
 };

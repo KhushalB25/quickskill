@@ -103,7 +103,7 @@ const useLeaderboardStore = create((set, get) => ({
 
         return {
           userId: doc.id,
-          displayName: data.displayName || data.email || 'Anonymous',
+          displayName: data.displayName || (data.email ? data.email.split('@')[0] : 'Unknown'),
           photoURL: data.photoURL || null,
           totalCorrect,
           totalAttempted,

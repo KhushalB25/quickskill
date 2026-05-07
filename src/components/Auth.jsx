@@ -7,14 +7,36 @@ import {
   signInWithPopup,
   googleProvider,
 } from '../firebase';
+import { validateUsernameFormat, checkUsernameAvailability, setInitialUsername } from '../utils/firestoreHelpers';
 
 export default function Auth() {
   const navigate = useNavigate();
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [username, setUsername] = useState('');
+  const [usernameError, setUsernameError] = useState('');
+  const [checkingUsername, setCheckingUsername] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const handleUsernameCheck = async (value) => {
+    setUsername(value);
+    setUsernameError('');
+
+    const formatError = validateUsernameFormat(value);
+    if (formatError) {
+      setUsernameError(formatError);
+      return;
+    }
+
+    setCheckingUsername(true);
+    const result = await checkUsernameAvailability(value);
+    setCheckingUsername(false);
+    if (!result.available) {
+      setUsernameError(result.message);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -23,7 +45,26 @@ export default function Auth() {
 
     try {
       if (isSignUp) {
-        await createUserWithEmailAndPassword(auth, email, password);
+        // Validate username
+        const formatError = validateUsernameFormat(username);
+        if (formatError) {
+          setUsernameError(formatError);
+          setLoading(false);
+          return;
+        }
+
+        const avail = await checkUsernameAvailability(username);
+        if (!avail.available) {
+          setUsernameError(avail.message);
+          setLoading(false);
+          return;
+        }
+
+        // Create Firebase auth account
+        const cred = await createUserWithEmailAndPassword(auth, email, password);
+
+        // Set initial username in Firestore
+        await setInitialUsername(cred.user.uid, username, email);
       } else {
         await signInWithEmailAndPassword(auth, email, password);
       }
@@ -86,7 +127,7 @@ export default function Auth() {
               {isSignUp ? 'Create Account' : 'Welcome Back'}
             </h2>
             <p className="mt-1 text-sm text-white/40 font-body">
-              {isSignUp ? 'Start training your cognitive skills' : 'Continue your training journey'}
+              {isSignUp ? 'Choose a unique username to get started' : 'Continue your training journey'}
             </p>
           </div>
 
@@ -97,6 +138,36 @@ export default function Auth() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            {isSignUp && (
+              <div>
+                <label className="block text-sm font-medium text-white/60 mb-1.5 font-body">
+                  Username
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    className={`input-neural pr-8 ${usernameError ? 'border-neon-coral/50' : ''}`}
+                    value={username}
+                    onChange={(e) => handleUsernameCheck(e.target.value)}
+                    placeholder="cool_nickname"
+                    required
+                    autoFocus
+                    minLength={3}
+                    maxLength={20}
+                  />
+                  {checkingUsername && (
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                      <div className="spinner-neural !h-4 !w-4 !border-2" />
+                    </div>
+                  )}
+                </div>
+                {usernameError ? (
+                  <p className="mt-1 text-xs text-neon-coral font-body">{usernameError}</p>
+                ) : username && username.length >= 3 ? (
+                  <p className="mt-1 text-xs text-emerald-400 font-body">Username available</p>
+                ) : null}
+              </div>
+            )}
             <div>
               <label className="block text-sm font-medium text-white/60 mb-1.5 font-body">
                 Email
@@ -107,7 +178,7 @@ export default function Auth() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                autoFocus
+                autoFocus={!isSignUp}
               />
             </div>
             <div>
@@ -125,8 +196,8 @@ export default function Auth() {
             </div>
             <button
               type="submit"
-              disabled={loading}
-              className="btn-primary w-full py-3"
+              disabled={loading || (isSignUp && usernameError)}
+              className="btn-primary w-full py-3 disabled:opacity-50"
             >
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
@@ -171,6 +242,7 @@ export default function Auth() {
               onClick={() => {
                 setIsSignUp(!isSignUp);
                 setError('');
+                setUsernameError('');
               }}
               className="font-medium text-blood transition-colors hover:text-blood/80"
             >
