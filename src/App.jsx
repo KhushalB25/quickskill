@@ -5,7 +5,7 @@ import useSkillStore from './stores/useSkillStore';
 import useProgressStore from './stores/useProgressStore';
 import useAchievementStore from './stores/useAchievementStore';
 import useToastStore from './stores/useToastStore';
-import { isAdminFromEnv } from './utils/firestoreHelpers';
+import { isAdminUser } from './utils/firestoreHelpers';
 import { useState } from 'react';
 import { playAchievement } from './utils/sound';
 import ToastContainer from './components/Toast';
@@ -52,8 +52,8 @@ function AdminRoute({ children }) {
   }, []);
 
   if (checking) return <LoadingFallback />;
-  const hasSecret = isAdminFromEnv();
-  if (!user && !hasSecret) return <Navigate to="/auth" replace />;
+  if (!user) return <Navigate to="/auth" replace />;
+  if (!isAdminUser(user)) return <Navigate to="/" replace />;
   return children;
 }
 
@@ -143,7 +143,7 @@ export default function App() {
             {user && (
               <>
                 <NavLink to="/profile" label="Profile" />
-                <NavLink to="/admin" label="Admin" />
+                {isAdminUser(user) && <NavLink to="/admin" label="Admin" />}
                 <button
                   onClick={handleSignOut}
                   className="btn-secondary ml-2 px-3 py-1.5 text-xs"
@@ -184,7 +184,7 @@ export default function App() {
               {user && (
                 <>
                   <MobileNavLink to="/profile" label="Profile" onClick={() => setMobileOpen(false)} />
-                  <MobileNavLink to="/admin" label="Admin" onClick={() => setMobileOpen(false)} />
+                  {isAdminUser(user) && <MobileNavLink to="/admin" label="Admin" onClick={() => setMobileOpen(false)} />}
                   <button
                     onClick={() => { setMobileOpen(false); handleSignOut(); }}
                     className="rounded-lg px-3 py-2 text-left text-sm font-medium text-white/50 hover:bg-white/[0.04] hover:text-white font-body"

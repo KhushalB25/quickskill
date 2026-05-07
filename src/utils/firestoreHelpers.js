@@ -63,9 +63,20 @@ export function getTodayDateStr() {
 }
 
 /**
- * Verify the admin secret from env.
+ * Verify the admin secret from env (legacy).
  */
 export function isAdminFromEnv() {
   const secret = import.meta.env.VITE_ADMIN_SECRET;
   return secret && secret.length > 0;
+}
+
+/**
+ * Check if a Firebase user is the admin by comparing their email
+ * against VITE_ADMIN_EMAIL in .env
+ */
+export function isAdminUser(user) {
+  if (!user?.email) return false;
+  const adminEmail = import.meta.env.VITE_ADMIN_EMAIL;
+  if (!adminEmail) return false;
+  return user.email.toLowerCase() === adminEmail.toLowerCase();
 }
