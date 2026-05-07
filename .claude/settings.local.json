@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run *)",
+      "Bash(where node *)",
+      "Bash(npm ls *)",
+      "Bash(npm install *)",
+      "Bash(nvm install *)",
+      "Bash(python debug_buttons2.py)"
+    ]
+  }
+}
