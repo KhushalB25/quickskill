@@ -50,7 +50,7 @@ const useStreakStore = create(
       },
     }),
     {
-      name: 'quickskill-streak',
+      name: 'everyai-streak',
     }
   )
 );

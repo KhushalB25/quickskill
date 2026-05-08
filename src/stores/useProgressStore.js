@@ -265,7 +265,7 @@ const useProgressStore = create(
       setTotalCorrect: (totalCorrect) => set({ totalCorrect }),
     }),
     {
-      name: 'quickskill-progress',
+      name: 'everyai-progress',
       partialize: (state) => ({
         progress: state.progress,
         totalCorrect: state.totalCorrect,

@@ -1,5 +1,5 @@
 ﻿/**
- * Seed script for QuickSkill v2.
+ * Seed script for everyai v2.
  *
  * Populates Firestore with expanded skills, topic-tagged questions,
  * learning explanations, and varied interaction types.
