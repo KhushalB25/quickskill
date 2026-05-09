@@ -1,4 +1,4 @@
-# QuickSkill
+# everyai
 
 Sharpen your cognitive skills with interactive training exercises.
 

@@ -129,11 +129,7 @@ export default function App() {
       <nav className="sticky top-0 z-50 border-b border-white/[0.05] bg-crimson-950/85 backdrop-blur-xl">
         <div className="content-area mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
           <Link to="/" className="flex items-center gap-2.5 group">
-            <div className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-blood text-[11px] font-bold text-white shadow-red-sm group-hover:shadow-red-glow transition-shadow duration-300">
-              <div className="absolute inset-0 rounded-xl border border-gold/30 pointer-events-none" />
-              QS
-            </div>
-            <span className="font-display text-lg font-bold tracking-tight gradient-text">QuickSkill</span>
+            <img src="/logo.png" alt="everyai" className="h-12 w-auto" />
           </Link>
 
           {/* Desktop nav */}
@@ -249,7 +245,7 @@ export default function App() {
       {/* Footer */}
       <footer className="relative z-10 border-t border-white/[0.05] bg-crimson-950 py-5 text-center">
         <p className="text-xs text-white/20 font-body">
-          QuickSkill &copy; {new Date().getFullYear()}
+          everyai &copy; {new Date().getFullYear()}
         </p>
       </footer>
     </div>

@@ -31,7 +31,7 @@ const useSkillStore = create(
       },
     }),
     {
-      name: 'quickskill-skills',
+      name: 'everyai-skills',
       partialize: (state) => ({ skills: state.skills }),
     }
   )

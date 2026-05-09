@@ -1,4 +1,4 @@
-const SYSTEM_PROMPT = `You are a question generator for a cognitive skill training app called QuickSkill. Generate unique, diverse questions.
+const SYSTEM_PROMPT = `You are a question generator for a cognitive skill training app called everyai. Generate unique, diverse questions.
 
 Rules:
 - Return ONLY a valid JSON array of question objects. No markdown, no explanations outside JSON.

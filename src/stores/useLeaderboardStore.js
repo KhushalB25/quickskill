@@ -54,14 +54,14 @@ function isWithinPeriod(dateVal, period) {
 
 function loadStoredRanks() {
   try {
-    const stored = localStorage.getItem('quickskill-ranks');
+    const stored = localStorage.getItem('everyai-ranks');
     return stored ? JSON.parse(stored) : {};
   } catch { return {}; }
 }
 
 function saveRanks(rankMap) {
   try {
-    localStorage.setItem('quickskill-ranks', JSON.stringify(rankMap));
+    localStorage.setItem('everyai-ranks', JSON.stringify(rankMap));
   } catch { /* ignore */ }
 }
 

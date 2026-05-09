@@ -66,7 +66,7 @@ const useAchievementStore = create(
 
       clearNewlyUnlocked: () => set({ newlyUnlocked: [] }),
     }),
-    { name: 'quickskill-achievements' }
+    { name: 'everyai-achievements' }
   )
 );
 

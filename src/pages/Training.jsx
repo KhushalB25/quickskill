@@ -287,12 +287,12 @@ export default function Training({ user }) {
         // Merge new AI questions with existing bank (saveUserQuestionBank does dedup internally)
         const merged = [...existingBank, ...newQuestions];
         await saveUserQuestionBank(user.uid, skillId, merged);
-        console.log(`[QuickSkill] AI generated ${newQuestions.length} questions, bank now has ${merged.length > 60 ? 60 : merged.length} questions`);
+        console.log(`[everyai] AI generated ${newQuestions.length} questions, bank now has ${merged.length > 60 ? 60 : merged.length} questions`);
       } else {
         throw new Error('AI returned too few questions');
       }
     } catch (err) {
-      console.error('[QuickSkill] Question generation failed, using fallback:', err.message);
+      console.error('[everyai] Question generation failed, using fallback:', err.message);
       // Fallback: load existing user bank and create variants from it
       const existingBank = await fetchUserQuestionBank(user.uid, skillId, questionBank);
       if (existingBank.length > 0) {
@@ -302,7 +302,7 @@ export default function Training({ user }) {
         const merged = [...new Map(
           [...preserved, ...fallback].map((q) => [q.questionText, q])
         ).values()].slice(0, 60);
-        console.log(`[QuickSkill] Fallback: existingBank=${existingBank.length} preserved=${preserved.length} fallback=${fallback.length} merged=${merged.length}`);
+        console.log(`[everyai] Fallback: existingBank=${existingBank.length} preserved=${preserved.length} fallback=${fallback.length} merged=${merged.length}`);
         await saveUserQuestionBank(user.uid, skillId, merged);
       }
     } finally {
@@ -336,11 +336,11 @@ export default function Training({ user }) {
         const topicCounts = [...new Set(merged.map((q) => q.topic || 'general'))]
           .map((t) => `${t}=${merged.filter((q) => (q.topic || 'general') === t).length}`)
           .join(', ');
-        console.log(`[QuickSkill] Pre-generated ${newQuestions.length} questions. Topic counts: ${topicCounts}`);
+        console.log(`[everyai] Pre-generated ${newQuestions.length} questions. Topic counts: ${topicCounts}`);
       }
     } catch (err) {
       // Silent failure — mid-session or post-session gen will cover it
-      console.warn('[QuickSkill] Pre-generation skipped (will generate during/after session):', err.message);
+      console.warn('[everyai] Pre-generation skipped (will generate during/after session):', err.message);
     }
   }, [user, skill, skillId, fetchUserQuestionBank, saveUserQuestionBank, questionBank, seedTopics]);
 
@@ -358,7 +358,7 @@ export default function Training({ user }) {
 
     if (user) {
       queue = await fetchUserQuestionBank(user.uid, skillId, questionBank);
-      console.log(`[QuickSkill] startTraining: loaded ${queue.length} questions, topics=${[...new Set(queue.map(q=>q.topic))].join(',')}`);
+      console.log(`[everyai] startTraining: loaded ${queue.length} questions, topics=${[...new Set(queue.map(q=>q.topic))].join(',')}`);
     } else {
       queue = [...questionBank];
     }
@@ -377,7 +377,7 @@ export default function Training({ user }) {
       const before = queue.length;
       queue = queue.filter((q) => !wrongTexts.has(q.questionText));
       if (before !== queue.length) {
-        console.log(`[QuickSkill] Filtered out ${before - queue.length} previously wrong questions (topics preserved for boost)`);
+        console.log(`[everyai] Filtered out ${before - queue.length} previously wrong questions (topics preserved for boost)`);
       }
     }
 
@@ -396,7 +396,7 @@ export default function Training({ user }) {
       }
       if (extra.length > 0) {
         queue = shuffle([...queue, ...extra]);
-        console.log(`[QuickSkill] Boosted session with ${extra.length} weak-topic questions`);
+        console.log(`[everyai] Boosted session with ${extra.length} weak-topic questions`);
       }
     }
 

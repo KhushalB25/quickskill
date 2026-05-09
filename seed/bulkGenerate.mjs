@@ -55,7 +55,7 @@ if (!AI_API_KEY) {
 }
 
 // ─── System prompt (same as api/generate.mjs) ─────────────────────
-const SYSTEM_PROMPT = `You are a question generator for a cognitive skill training app called QuickSkill. Generate unique, diverse questions.
+const SYSTEM_PROMPT = `You are a question generator for a cognitive skill training app called everyai. Generate unique, diverse questions.
 
 Rules:
 - Return ONLY a valid JSON array of question objects. No markdown, no explanations outside JSON.
@@ -285,7 +285,7 @@ function serializeSkills(skills) {
 
 // ─── Main ────────────────────────────────────────────────────────
 async function main() {
-  console.log('QuickSkill Bulk Question Generator');
+  console.log('everyai Bulk Question Generator');
   console.log(`Model: ${AI_MODEL}`);
   console.log(`Target: ${TARGET_PER_TOPIC} questions per focus area\n`);
 
