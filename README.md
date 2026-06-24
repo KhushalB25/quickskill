@@ -1,79 +1,82 @@
-# everyai
+# QuickSkill — EveryAI
 
-Sharpen your cognitive skills with interactive training exercises.
+[![Live](https://img.shields.io/badge/live-everyai.in-2ea44f?style=flat-square)](https://www.everyai.in)
+![React](https://img.shields.io/badge/React-18-61dafb?style=flat-square&logo=react)
+![Vite](https://img.shields.io/badge/Vite-5-646cff?style=flat-square&logo=vite)
+![Tailwind](https://img.shields.io/badge/Tailwind-3-38bdf8?style=flat-square&logo=tailwindcss)
+![Firebase](https://img.shields.io/badge/Firebase-Auth%20%2B%20Firestore-ffca28?style=flat-square&logo=firebase)
+
+**Live demo:** **[www.everyai.in](https://www.everyai.in)**
+
+AI-powered cognitive training platform. Sharpen pattern recognition, vocabulary, mental math, memory recall, and logic with adaptive exercises across 30+ skill categories. Daily challenges, real-time progress tracking, and a competitive leaderboard.
+
+---
 
 ## Features
 
-- **Skill-based training**: Practice pattern recognition, vocabulary, mental math, memory recall, logic puzzles, and more
-- **Question cards**: Multiple-choice and text-answer question types
-- **Progress tracking**: Scores and progress persist per user via Firebase
-- **Daily challenges**: Complete daily challenges for extra motivation
-- **Leaderboard**: Compete with other users ranked by total correct answers
-- **Admin panel**: Create and manage skills and questions (protected by admin secret)
+- **Adaptive skill training** — pattern recognition, vocabulary, mental math, memory recall, logic puzzles, word association, and more
+- **Question cards** — multiple-choice and text-answer formats
+- **Real-time progress tracking** — scores and weak-area analysis persist per user in Firestore
+- **Daily challenges** — keep streaks alive with rotating prompts
+- **Leaderboard** — global ranking by total correct answers, indexed for fast reads
+- **Admin panel** — gated skill + question authoring behind a secret env var
 
 ## Tech Stack
 
-- **Frontend**: React 18 + React Router 6 + Zustand (state) + Tailwind CSS 3
-- **Backend**: Firebase (Auth, Firestore)
-- **Build**: Vite
+| Layer | Tech |
+|---|---|
+| Frontend | React 18, React Router 6, Zustand, Tailwind CSS 3 |
+| Backend | Firebase Auth (Email/Password + Google), Firestore |
+| Build | Vite 5 |
+| Seed / Admin | Node.js + firebase-admin |
 
 ## Getting Started
 
 ### Prerequisites
 
 - Node.js 18+
-- A Firebase project with Auth (Email/Password + Google) and Firestore enabled
+- Firebase project with Auth (Email/Password + Google) and Firestore enabled
 
 ### Setup
 
-1. Clone the repository and install dependencies:
-
 ```bash
+git clone https://github.com/KhushalB25/quickskill.git
+cd quickskill
 npm install
-```
-
-2. Create a `.env` file from `.env.example` and fill in your Firebase config values:
-
-```bash
 cp .env.example .env
-```
-
-3. Set up Firebase:
-   - Enable **Email/Password** and **Google** sign-in methods in Firebase Authentication
-   - Create a Firestore database (start in test mode, then update security rules for production)
-   - Create composite index for leaderboard: `users` collection, `totalCorrect` descending
-
-4. Start the dev server:
-
-```bash
+# fill in Firebase web app config in .env
 npm run dev
 ```
 
-### Seeding Skills
+### Firebase setup
 
-To populate the app with initial skills and questions:
+- Enable **Email/Password** and **Google** sign-in in Firebase Auth
+- Create a Firestore database (test mode → tighten with `firestore.rules` before prod)
+- Composite index: `users` collection, `totalCorrect` desc (used by leaderboard query)
 
-1. Generate a Firebase service account key:
-   - Firebase Console → Project Settings → Service Accounts → Generate New Private Key
-   - Save the JSON file as `serviceAccountKey.json` in the project root
-
-2. Run the seed script:
+### Seeding skills
 
 ```bash
+# Firebase Console → Project Settings → Service Accounts → Generate New Private Key
+# Save as serviceAccountKey.json in repo root
 npm run seed
 ```
 
-This creates 6 skills (Pattern Recognition, Vocabulary Builder, Mental Math, Memory Recall, Logic Puzzles, Word Association) with 5 questions each.
+Creates 6 starter skills (Pattern Recognition, Vocabulary Builder, Mental Math, Memory Recall, Logic Puzzles, Word Association) with 5 questions each.
 
-### Admin Access
+### Admin access
 
-Set `VITE_ADMIN_SECRET` in `.env` to any non-empty value to enable the admin panel. Navigate to `/admin` in the app to manage skills.
+Set `VITE_ADMIN_SECRET` to any non-empty value, then visit `/admin`.
 
 ## Scripts
 
 | Command | Description |
-|---------|-------------|
-| `npm run dev` | Start Vite dev server |
-| `npm run build` | Build for production |
+|---|---|
+| `npm run dev` | Vite dev server |
+| `npm run build` | Production build |
 | `npm run preview` | Preview production build |
-| `npm run seed` | Seed Firestore with initial skills |
+| `npm run seed` | Seed Firestore with starter skills |
+
+## License
+
+MIT
